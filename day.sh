@@ -7,14 +7,13 @@ then
 fi
 
 day_script="./src/day$1.py"
-day_input="./input/day$1.txt"
 
 if [  "$2" = "test" ]
 then
     echo "Running tests for day $1"
-    day_input=""
+    python3 "$day_script"
 else
     echo "Running solution for day $1"
+    day_input="./input/day$1.txt"
+    python3 "$day_script" "$day_input"
 fi
-
-python3 "$day_script" "$day_input"
