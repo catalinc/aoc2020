@@ -17,4 +17,4 @@ else
     echo "Running solution for day $1"
 fi
 
-python3 $day_script $day_input
+python3 "$day_script" "$day_input"
