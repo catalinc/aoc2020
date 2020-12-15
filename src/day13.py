@@ -1,7 +1,7 @@
-import sys
 import unittest
+from typing import Tuple, List
 
-from typing import Tuple
+import sys
 
 
 def first_bus_and_wait_time(depart: str, timetable: str) -> Tuple[int, int]:
@@ -22,19 +22,35 @@ def part1(depart, timetable) -> None:
 
 def earliest_timestamp(timetable: str) -> int:
     busses = [(int(x), i) for i, x in enumerate(timetable.split(',')) if x != 'x']
-    first, n = busses[0][0], len(busses)
-    t = first
-    while True:
-        t += first
-        i, found = 1, True
-        while i < n:
-            bus_id, offset = busses[i]
-            if (t + offset) % bus_id != 0:
-                found = False
-                break
-            i += 1
-        if found:
-            return t
+    ns = [b[0] for b in busses]
+    rs = [b[0] - b[1] for b in busses]
+    return crt(ns, rs)
+
+
+def crt(ns: List[int], rs: List[int]) -> int:
+    m = 1
+    for n in ns:
+        m *= n
+    ys = [m // n for n in ns]
+    zs = [modinv(y, n) for y, n in zip(ys, ns)]
+    x = sum([r * y * z for r, y, z in zip(rs, ys, zs)])
+    return x % m
+
+
+def egcd(a: int, b: int) -> Tuple[int, int, int]:
+    if a == 0:
+        return b, 0, 1
+    else:
+        g, y, x = egcd(b % a, a)
+        return g, x - (b // a) * y, y
+
+
+def modinv(a: int, m: int) -> int:
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
 
 
 def part2(timetable: str) -> None:
