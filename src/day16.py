@@ -1,8 +1,9 @@
 import re
-import sys
 import unittest
-from typing import Dict, List, Tuple
 from collections import defaultdict
+from typing import Dict, List, Tuple
+
+import sys
 
 
 class Rule:
@@ -15,6 +16,9 @@ class Rule:
         for r in self.ranges:
             if r[0] <= n <= r[1]:
                 return True
+
+    def __str__(self):
+        return f"{self.name}: {' '.join([str(r) for r in self.ranges])}"
 
 
 def parse_rule(s: str) -> Rule:
@@ -63,11 +67,28 @@ def find_matching_fields(rules: List[Rule], tickets: List[List[int]]) -> Dict[st
         if len(mr) != len(rules):
             continue
         for i in range(len(t)):
-            fields = mr[i]
-            if len(fields) == 1:
-                matches[fields[0]] = i
-                break
-    return matches
+            fs = matches.get(i)
+            if not fs:
+                matches[i] = set(mr[i])
+            else:
+                matches[i] = matches[i].intersection(mr[i])
+    fields = {}
+    while matches:
+        matched = []
+        for i, names in matches.items():
+            if len(names) == 1:
+                s = names.pop()
+                fields[s] = i
+                matched.append(s)
+        for s in matched:
+            for i, names in matches.items():
+                if s in names:
+                    names.remove(s)
+        for s, i in fields.items():
+            if i in matches:
+                del matches[i]
+
+    return fields
 
 
 def part1(rules: List[Rule], tickets: List[List[int]]) -> None:
@@ -75,7 +96,12 @@ def part1(rules: List[Rule], tickets: List[List[int]]) -> None:
 
 
 def part2(rules: List[Rule], my_ticket: List[int], tickets: List[List[int]]) -> None:
-    pass
+    fields = find_matching_fields(rules, tickets)
+    p = 1
+    for s, i in fields.items():
+        if s.startswith("departure"):
+            p *= my_ticket[i]
+    print(p)
 
 
 class Test(unittest.TestCase):
@@ -109,10 +135,10 @@ nearby tickets:
 15,1,5
 5,14,9"""
         rs, _, ts = parse_input(s)
-        mf = find_matching_fields(rs, ts)
-        self.assertEqual(0, mf["row"])
-        self.assertEqual(1, mf["class"])
-        self.assertEqual(2, mf["seat"])
+        fs = find_matching_fields(rs, ts)
+        self.assertEqual(0, fs["row"])
+        self.assertEqual(1, fs["class"])
+        self.assertEqual(2, fs["seat"])
 
 
 if __name__ == '__main__':
