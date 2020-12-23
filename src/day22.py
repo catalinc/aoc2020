@@ -2,7 +2,6 @@ import sys
 import unittest
 
 from collections import deque
-from functools import cache
 
 
 def part1(game_data: str):
