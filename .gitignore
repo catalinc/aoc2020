@@ -131,3 +131,6 @@ dmypy.json
 # Idea project files
 .idea/
 *.iml
+
+# MacOS
+.DS_Store
